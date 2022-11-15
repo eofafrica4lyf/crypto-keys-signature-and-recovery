@@ -24,31 +24,43 @@ const generateKeys = async (req: Request, res: Response): Promise<Response> => {
       message: error.message
     });
   }
-  
 };
 
 const signMessage = async (req: Request, res: Response): Promise<Response> => {
-  const keys:IKeys[] = await KeysService.getKeys();
-  
-  const decryptedKeys: IKeyPair[] = await KeysService.decryptPrivateKeys(keys, req.body.pinCode);
+  try {
+    const keys:IKeys[] = await KeysService.getKeys();
+    
+    const decryptedKeys: IKeyPair[] = await KeysService.decryptPrivateKeys(keys, req.body.pinCode);
+    if(!decryptedKeys || decryptedKeys.length === 0) return res.status(404).json({
+      success: false,
+      data: null,
+      message: "Wrong Pin Code"
+    })
 
-  const currentPrivateKey:IKeyPair[] = decryptedKeys.filter((key: IKeyPair) => key.public === req.body.publicKey)
+    const currentPrivateKey:IKeyPair[] = decryptedKeys.filter((key: IKeyPair) => key.public === req.body.publicKey)
 
-  if(!currentPrivateKey || currentPrivateKey.length === 0) return res.status(404).json({
-    success: false,
-    data: null,
-    message: "Private key not found"
-  })
+    if(!currentPrivateKey || currentPrivateKey.length === 0) return res.status(404).json({
+      success: false,
+      data: null,
+      message: "Private key not found"
+    })
 
-  const signedMessage = await KeysService.signMessage(currentPrivateKey[0].private as string, req.body.pinCode);
+    const signedMessage = await KeysService.signMessage(currentPrivateKey[0].private as string, req.body.message);
 
-  await KeysService.encryptKeys(keys, req.body.pinCode);
+    await KeysService.encryptKeys(keys, req.body.pinCode);
 
-  return res.status(200).json({
-    success: true,
-    data: { signature: signedMessage },
-    message: null
-  })
+    return res.status(200).json({
+      success: true,
+      data: { signature: signedMessage },
+      message: null
+    })
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      data: null,
+      message: error.message
+    });
+  }
 }
 
 async function recoverPublicKey(req: Request, res: Response): Promise<Response> {

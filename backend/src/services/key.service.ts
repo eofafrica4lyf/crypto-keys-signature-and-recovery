@@ -33,8 +33,8 @@ async function generateKeys(): Promise<IKeyPair[]> {
 async function encryptKeys(keys: IKeyPair[], pin: string): Promise<IKeyPair["private"][]> {
     const encryptedKeysPromises = [];
 
-    //generate 32-bit key
-    let keyBytes = crypto.pbkdf2Sync('secret', 'salt', 100000, 32, 'sha256');
+    //generate 32-bit key; allows us to generate pre-determined length keys irrespective of the seed length
+    let keyBytes = crypto.pbkdf2Sync(pin, 'salt', 100000, 32, 'sha256');
     // let keyBytes = new Uint32Array(Buffer.from(pin));
     let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
 
@@ -72,19 +72,24 @@ async function getKeys(): Promise<IKeys[]> {
 }
 
 async function decryptPrivateKeys(keys: IKeys[], pin: string): Promise<IKeyPair[]>{
-    let decryptedKeys: IKeyPair[] = [];
-    let keyBytes = new Uint32Array(Buffer.from(pin));
-    let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
-
-    for(let i = 0; i < keys.length; i++) {
-        var encryptedBytes = aesjs.utils.hex.toBytes(keys[i].privateHex);
-        let decryptedMessage = await aesCtr.decrypt(encryptedBytes);
-        let decryptedText = aesjs.utils.utf8.fromBytes(decryptedMessage);
-        let regeneratedPublicKey = PrivateKey.fromString(decryptedText).toPublic().toString() 
-        decryptedKeys.push({private: decryptedText, public: regeneratedPublicKey});
+    try {
+        let decryptedKeys: IKeyPair[] = [];
+        // let keyBytes = new Uint32Array(Buffer.from(pin));
+        let keyBytes = crypto.pbkdf2Sync(pin, 'salt', 100000, 32, 'sha256');
+        let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
+    
+        for(let i = 0; i < keys.length; i++) {
+            var encryptedBytes = aesjs.utils.hex.toBytes(keys[i].privateHex);
+            let decryptedMessage = await aesCtr.decrypt(encryptedBytes);
+            let decryptedText = aesjs.utils.utf8.fromBytes(decryptedMessage);
+            let regeneratedPublicKey = PrivateKey.fromString(decryptedText).toPublic().toString() 
+            decryptedKeys.push({private: decryptedText, public: regeneratedPublicKey});
+        }
+    
+        return decryptedKeys;
+    } catch (error) {
+        return [];
     }
-
-    return decryptedKeys;
 }
 
 async function signMessage(privateKey: string, message: string): Promise<string> {
