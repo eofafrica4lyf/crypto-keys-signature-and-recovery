@@ -30,15 +30,15 @@ async function generateKeys(): Promise<IKeyPair[]> {
     return generatedKeys;
 }
 
-async function encryptKeys(keys: IKeyPair[], pin: string): Promise<IKeyPair["private"][]> {
+async function encryptKeys(keys: string[], pin: string): Promise<string[]> {
     const encryptedKeysPromises = [];
 
     //generate 32-bit key; allows us to generate pre-determined length keys irrespective of the seed length
-    let keyBytes = crypto.pbkdf2Sync(pin, 'salt', 100000, 32, 'sha256');
+    let keyBytes = crypto.pbkdf2Sync(pin, process.env.SALT || 'salt', 100000, 32, 'sha256');
     let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
 
     for(let i = 0; i < keys.length; i++) {
-        let textBytes = aesjs.utils.utf8.toBytes(keys[i].private as string);
+        let textBytes = aesjs.utils.utf8.toBytes(keys[i]);
         encryptedKeysPromises.push(aesCtr.encrypt(textBytes));
     }
 
@@ -60,8 +60,8 @@ async function clearKeys (): Promise<void> {
     return;
 }
 
-async function saveGeneratedKeys(keys: IKeyPair[], encryptedKeys: IKeyPair["private"][]): Promise<IKeys[]> {
-    const data = keys.map((key: IKeyPair, index: number) => ({ ...key, privateHex: encryptedKeys[index]}))
+async function saveGeneratedKeys(encryptedKeys: string[]): Promise<IKeys[]> {
+    const data = encryptedKeys.map((key: string) => ({privateHex: key})) as IKeys[]
     const savedData: IKeys[] = await keysModel.insertMany(data)
     return savedData;
 }
@@ -74,7 +74,7 @@ async function decryptPrivateKeys(keys: IKeys[], pin: string): Promise<IKeyPair[
     try {
         let decryptedKeys: IKeyPair[] = [];
         // let keyBytes = new Uint32Array(Buffer.from(pin));
-        let keyBytes = crypto.pbkdf2Sync(pin, 'salt', 100000, 32, 'sha256');
+        let keyBytes = crypto.pbkdf2Sync(pin, process.env.SALT || 'salt', 100000, 32, 'sha256');
 		console.log("TCL: keyBytes", keyBytes)
         let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
     
