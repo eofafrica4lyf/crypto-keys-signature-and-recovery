@@ -1,8 +1,6 @@
 import keysModel, { IKeyPair, IKeys } from "../models/keys.model";
 import ecc, { PrivateKey } from "eosjs-ecc";
 import aesjs from 'aes-js';
-import crypto from "crypto";
-import { execSync } from "child_process";
 
 async function generateKeys(): Promise<IKeyPair[]> {
     let generatedKeys: IKeyPair[] = []
@@ -55,24 +53,6 @@ async function encryptKeys(keys: IKeyPair[], pin: string): Promise<IKeyPair["pri
 
     return keysToHex;
 }
-
-const decoder = new TextDecoder('UTF-8');
-
-const toString = (bytes: any) => {
-    const array = new Uint8Array(bytes);
-    return decoder.decode(array);
-};
-
-const toBytes = (str: string)=> {
-	const buffer: Buffer = Buffer.from(str, 'utf8');
-	const result = Array(buffer.length);
-	for (var i = 0; i < buffer.length; i++) {
-		result[i] = buffer[i];
-	}
-	return result;
-};
-// const bytes = toBytes('Some text here...');
-// console.log(bytes);
 
 async function clearKeys (): Promise<void> {
     await keysModel.deleteMany();
