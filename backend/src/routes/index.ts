@@ -3,4 +3,5 @@ import KeysController from "../controller/key.controller";
 
 export default ({ app }: RoutesInput) => {
     app.post("/generate-keys", KeysController.generateKeys);
+    app.post("/sign-message", KeysController.signMessage);
 };

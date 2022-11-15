@@ -1,10 +1,11 @@
-import keysModel, { IKeyPairs, IKeys } from "../models/keys.model";
-import { PrivateKey } from "eosjs-ecc";
+import keysModel, { IKeyPair, IKeys } from "../models/keys.model";
+import ecc, { PrivateKey } from "eosjs-ecc";
 import aesjs from 'aes-js';
 import crypto from "crypto";
+import { execSync } from "child_process";
 
-async function generateKeys(): Promise<IKeyPairs[]> {
-    let generatedKeys: IKeyPairs[] = []
+async function generateKeys(): Promise<IKeyPair[]> {
+    let generatedKeys: IKeyPair[] = []
     const privateKeysPromises: Promise<string>[] = [];
     let publicKeysPromises: Promise<string>[] = [];
     let publicKeys: string[] = [];
@@ -30,7 +31,7 @@ async function generateKeys(): Promise<IKeyPairs[]> {
     return generatedKeys;
 }
 
-async function encryptKeys(keys: IKeyPairs[], pin: string): Promise<IKeyPairs["private"][]> {
+async function encryptKeys(keys: IKeyPair[], pin: string): Promise<IKeyPair["private"][]> {
     const encryptedKeysPromises = [];
 
     // const keyz = crypto.pbkdf2Sync('secret', 'salt', 100000, 32, 'sha256');
@@ -78,15 +79,42 @@ async function clearKeys (): Promise<void> {
     return;
 }
 
-async function saveGeneratedKeys(keys: IKeyPairs[], encryptedKeys: IKeyPairs["private"][]): Promise<IKeys[]> {
-    const data = keys.map((key: IKeyPairs, index: number) => ({ ...key, privateHex: encryptedKeys[index]}))
+async function saveGeneratedKeys(keys: IKeyPair[], encryptedKeys: IKeyPair["private"][]): Promise<IKeys[]> {
+    const data = keys.map((key: IKeyPair, index: number) => ({ ...key, privateHex: encryptedKeys[index]}))
     const savedData: IKeys[] = await keysModel.insertMany(data)
     return savedData;
+}
+
+async function getKeys(): Promise<IKeys[]> {
+    return await keysModel.find() as IKeys[];
+}
+
+async function decryptPrivateKeys(keys: IKeys[], pin: string): Promise<IKeyPair[]>{
+    let decryptedKeys: IKeyPair[] = [];
+    let keyBytes = new Uint32Array(Buffer.from(pin));
+    let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
+
+    for(let i = 0; i < keys.length; i++) {
+        var encryptedBytes = aesjs.utils.hex.toBytes(keys[i].privateHex);
+        let decryptedMessage = await aesCtr.decrypt(encryptedBytes);
+        let decryptedText = aesjs.utils.utf8.fromBytes(decryptedMessage);
+        let regeneratedPublicKey = PrivateKey.fromString(decryptedText).toPublic().toString() 
+        decryptedKeys.push({private: decryptedText, public: regeneratedPublicKey});
+    }
+
+    return decryptedKeys;
+}
+
+async function signMessage(privateKey: string, message: string): Promise<string> {
+    return await ecc.sign(message, PrivateKey.fromString(privateKey));
 }
 
 export default {
     generateKeys,
     encryptKeys,
     clearKeys,
-    saveGeneratedKeys
+    saveGeneratedKeys,
+    getKeys,
+    decryptPrivateKeys,
+    signMessage
 }

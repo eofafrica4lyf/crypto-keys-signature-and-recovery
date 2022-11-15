@@ -1,18 +1,18 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IKeys extends Document {
-    private: String;
-    public: String;
-    privateHex: String;
+    private: string;
+    public: string;
+    privateHex: string;
 }
 
-export interface IKeyPairs {
-    private?: String;
-    public?: String;
+export interface IKeyPair {
+    private?: string;
+    public?: string;
 }
 
 export interface IEncryptedPrivateKey {
-    nonce: String;
+    nonce: string;
     message: Buffer;
     checksum: Number;
 }
