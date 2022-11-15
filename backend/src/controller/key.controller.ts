@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { IKeyPair, IKeys } from "../models/keys.model";
 import KeysService from "../services/key.service";
 
-const generateKeys = async (req: Request, res: Response) => {
+const generateKeys = async (req: Request, res: Response): Promise<Response> => {
   const keys = await KeysService.generateKeys();
 
   const encryptedKeys = await KeysService.encryptKeys(keys, req.body.pinCode)
@@ -18,7 +18,7 @@ const generateKeys = async (req: Request, res: Response) => {
   });
 };
 
-const signMessage = async (req: Request, res: Response) => {
+const signMessage = async (req: Request, res: Response): Promise<Response> => {
   const keys:IKeys[] = await KeysService.getKeys();
   
   const decryptedKeys: IKeyPair[] = await KeysService.decryptPrivateKeys(keys, req.body.pinCode);
@@ -42,7 +42,18 @@ const signMessage = async (req: Request, res: Response) => {
   })
 }
 
+async function recoverPublicKey(req: Request, res: Response): Promise<Response> {
+  const {message, signature} = req.body;
+  const publicKey = await KeysService.recoverPublicKey(message, signature)
+  return res.status(200).json({
+    success: true,
+    data: { publicKey },
+    message: null
+  })
+}
+
 export default {
   generateKeys,
-  signMessage
+  signMessage,
+  recoverPublicKey
 };

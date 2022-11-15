@@ -109,6 +109,10 @@ async function signMessage(privateKey: string, message: string): Promise<string>
     return await ecc.sign(message, PrivateKey.fromString(privateKey));
 }
 
+async function recoverPublicKey(message: string, signature: string): Promise<string> {
+    return await ecc.recover(signature, message);
+}
+
 export default {
     generateKeys,
     encryptKeys,
@@ -116,5 +120,6 @@ export default {
     saveGeneratedKeys,
     getKeys,
     decryptPrivateKeys,
-    signMessage
+    signMessage,
+    recoverPublicKey
 }
