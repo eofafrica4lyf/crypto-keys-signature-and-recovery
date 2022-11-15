@@ -1,6 +1,7 @@
 import keysModel, { IKeyPair, IKeys } from "../models/keys.model";
 import ecc, { PrivateKey } from "eosjs-ecc";
 import aesjs from 'aes-js';
+import crypto from 'crypto';
 
 async function generateKeys(): Promise<IKeyPair[]> {
     let generatedKeys: IKeyPair[] = []
@@ -32,8 +33,9 @@ async function generateKeys(): Promise<IKeyPair[]> {
 async function encryptKeys(keys: IKeyPair[], pin: string): Promise<IKeyPair["private"][]> {
     const encryptedKeysPromises = [];
 
-    // const keyz = crypto.pbkdf2Sync('secret', 'salt', 100000, 32, 'sha256');
-    let keyBytes = new Uint32Array(Buffer.from(pin));
+    //generate 32-bit key
+    let keyBytes = crypto.pbkdf2Sync('secret', 'salt', 100000, 32, 'sha256');
+    // let keyBytes = new Uint32Array(Buffer.from(pin));
     let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
 
     for(let i = 0; i < keys.length; i++) {

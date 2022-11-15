@@ -3,11 +3,13 @@ import "dotenv/config";
 import bodyParser from "body-parser";
 import Routes from "./routes";
 import Connect from "./db/connect";
+import cors from 'cors';
 
 const app: Application = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
     res.send("TS App is Running");

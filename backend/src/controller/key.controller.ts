@@ -3,19 +3,28 @@ import { IKeyPair, IKeys } from "../models/keys.model";
 import KeysService from "../services/key.service";
 
 const generateKeys = async (req: Request, res: Response): Promise<Response> => {
-  const keys = await KeysService.generateKeys();
+  try {
+    const keys = await KeysService.generateKeys();
 
-  const encryptedKeys = await KeysService.encryptKeys(keys, req.body.pinCode)
+    const encryptedKeys = await KeysService.encryptKeys(keys, req.body.pinCode)
 
-  await KeysService.clearKeys();
+    await KeysService.clearKeys();
 
-  const savedKeys = await KeysService.saveGeneratedKeys(keys, encryptedKeys);
+    const savedKeys = await KeysService.saveGeneratedKeys(keys, encryptedKeys);
 
-  return res.status(200).json({
-    success: true,
-    data: { pinCode: req.body.pinCode, keys: JSON.parse(JSON.stringify(savedKeys.map(key => key.public))) },
-    message: null
-  });
+    return res.status(200).json({
+      success: true,
+      data: { pinCode: req.body.pinCode, keys: JSON.parse(JSON.stringify(savedKeys.map(key => key.public))) },
+      message: null
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      data: null,
+      message: error.message
+    });
+  }
+  
 };
 
 const signMessage = async (req: Request, res: Response): Promise<Response> => {
