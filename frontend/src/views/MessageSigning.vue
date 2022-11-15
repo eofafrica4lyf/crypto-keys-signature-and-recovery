@@ -36,9 +36,9 @@ export default {
   data() {
     return {
       formData: {
-        message: '',
+        message: 'asdfghjk',
         publicKeys: [],
-        pinCode: '',
+        pinCode: 'm',
         selectedPublicKey: '',
         signature: '',
       },

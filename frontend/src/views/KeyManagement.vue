@@ -23,7 +23,7 @@ export default {
   data() {
     return {
       formData: {
-        pin: 'messageemessagee',
+        pin: 'm',
         day: '',
         reminder: '',
       },

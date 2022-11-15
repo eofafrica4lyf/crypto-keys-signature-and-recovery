@@ -35,7 +35,6 @@ async function encryptKeys(keys: IKeyPair[], pin: string): Promise<IKeyPair["pri
 
     //generate 32-bit key; allows us to generate pre-determined length keys irrespective of the seed length
     let keyBytes = crypto.pbkdf2Sync(pin, 'salt', 100000, 32, 'sha256');
-    // let keyBytes = new Uint32Array(Buffer.from(pin));
     let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
 
     for(let i = 0; i < keys.length; i++) {
@@ -76,6 +75,7 @@ async function decryptPrivateKeys(keys: IKeys[], pin: string): Promise<IKeyPair[
         let decryptedKeys: IKeyPair[] = [];
         // let keyBytes = new Uint32Array(Buffer.from(pin));
         let keyBytes = crypto.pbkdf2Sync(pin, 'salt', 100000, 32, 'sha256');
+		console.log("TCL: keyBytes", keyBytes)
         let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
     
         for(let i = 0; i < keys.length; i++) {

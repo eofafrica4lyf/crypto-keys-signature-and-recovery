@@ -1,18 +1,57 @@
 <template>
-  <div class="Key Recovery">
-    <h1>This is an about page</h1>
-    <HelloWorld />
+  <div class='key-recovery'>
+    <form @submit='recoverPublicKey($event)' class='add-form'>
+      <div class='form-control'>
+        <label for='message'>
+          <input type='text' v-model='formData.message' name='message' placeholder='input message' default />
+        </label>
+      </div>
+      <div class='form-control'>
+        <label for='signature'>
+          <input type='text' v-model='formData.signature' name='signature' placeholder='input signature' default />
+        </label>
+      </div>
+      <div class='form-control'>
+        <p>recovered public key</p>
+        <p>{{formData.recoveredPublicKey}}</p>
+      </div>
+      <input type='submit' value='recover' class='btn btn-block' />
+    </form>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue';
+import axios from '../config/index.ts';
 
 export default {
   name: 'KeyRecovery',
-  components: {
-    HelloWorld,
+  data() {
+    return {
+      formData: {
+        message: 'asdfghjk',
+        signature: '',
+        recoveredPublicKey: '',
+      },
+    };
+  },
+  methods: {
+    async recoverPublicKey(e) {
+      e.preventDefault();
+      let data;
+      try {
+        data = await axios.post(
+          'http://localhost:3000/recover-publickey',
+          {
+            message: this.formData.message,
+            signature: this.formData.signature,
+          },
+        );
+
+        this.formData.recoveredPublicKey = data.data.data.publicKey;
+      } catch (error) {
+        alert(`Request failed \n${error.response.data.message}`);
+      }
+    },
   },
 };
 </script>
