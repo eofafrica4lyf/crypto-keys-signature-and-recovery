@@ -15,4 +15,19 @@ describe("Key Service", () => {
             })
         });
     });
+    
+    describe("Key Encryption", () => {
+        beforeEach(async() => {
+            const generatedKeyPairs = await KeyService.generateKeys();
+            generatedPrivateKeys = generatedKeyPairs.map((key: IKeyPair) => key.private) as string[];
+        })
+        it("It should sucessfully encrypt a set of private keys", async () => {
+            const encryptedPrivateKeys = await KeyService.encryptKeys(generatedPrivateKeys, 'pin')
+            expect(encryptedPrivateKeys).to.be.an("array");
+            expect(encryptedPrivateKeys).to.have.lengthOf(5);
+            encryptedPrivateKeys.forEach((key) => {
+                expect(key).to.be.a("string");
+            })
+        });
+    });
 });
