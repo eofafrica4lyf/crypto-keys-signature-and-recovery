@@ -1,14 +1,16 @@
 <template>
   <div class='key-management'>
     <form @submit='fetchPublicKeys($event)' class='add-form'>
-      <div class='form-control'>
-        <label for='pincode'>
-          <input type='text' v-model='formData.pin' name='pincode' placeholder='pin code for encryption' default />
-        </label>
-      </div>
-      <div class='form-control'>
-        <p>generated pub keys</p>
-        <p v-for='key in generatedPublicKeys' :value='key' :key='key'>{{ key }}</p>
+      <div class='input-fields'>
+        <div class='form-control'>
+          <label for='pincode'>
+            <input type='text' v-model='formData.pin' name='pincode' placeholder='pin code for encryption' default />
+          </label>
+        </div>
+        <div class='form-control result'>
+          <p>generated pub keys</p>
+          <p v-for='key in generatedPublicKeys' :value='key' :key='key'>{{ key }}</p>
+        </div>
       </div>
       <input type='submit' value='generate & encrypt' class='btn btn-block' />
     </form>

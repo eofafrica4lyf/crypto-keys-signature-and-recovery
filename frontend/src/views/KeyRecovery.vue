@@ -1,19 +1,20 @@
 <template>
   <div class='key-recovery'>
     <form @submit='recoverPublicKey($event)' class='add-form'>
-      <div class='form-control'>
-        <label for='message'>
-          <input type='text' v-model='formData.message' name='message' placeholder='input message' default />
-        </label>
-      </div>
-      <div class='form-control'>
-        <label for='signature'>
-          <input type='text' v-model='formData.signature' name='signature' placeholder='input signature' default />
-        </label>
-      </div>
-      <div class='form-control'>
-        <p>recovered public key</p>
-        <p>{{formData.recoveredPublicKey}}</p>
+      <div class='input-fields'>
+        <div class='form-control'>
+          <label for='message'>
+            <input type='text' v-model='formData.message' name='message' placeholder='input message' default />
+          </label>
+        </div>
+        <div class='form-control'>
+          <label for='signature'>
+            <input type='text' v-model='formData.signature' name='signature' placeholder='input signature' default />
+          </label>
+        </div>
+        <div class='form-control result'>
+          <p>{{formData.recoveredPublicKey}}</p>
+        </div>
       </div>
       <input type='submit' value='recover' class='btn btn-block' />
     </form>
@@ -30,7 +31,7 @@ export default {
       formData: {
         message: 'asdfghjk',
         signature: '',
-        recoveredPublicKey: '',
+        recoveredPublicKey: 'recovered public key',
       },
     };
   },
