@@ -8,7 +8,8 @@
     "lint": "eslint . --fix",
     "dev:debug": "ts-node-dev --transpile-only --respawn --inspect=4321 --project tsconfig.dev.json src/app.ts",
     "dev": "ts-node-dev --transpile-only --respawn --project tsconfig.json src/app.ts",
-    "test": "mocha"
+    "test": "mocha",
+    "test:coverage": "nyc --reporter=html npm run test"
   },
   "keywords": [],
   "author": "",

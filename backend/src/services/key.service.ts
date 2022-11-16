@@ -77,7 +77,7 @@ async function decryptPrivateKeys(keys: IKeys[], pin: string): Promise<IKeyPair[
         let aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes, new aesjs.Counter(5));
     
         for(let i = 0; i < keys.length; i++) {
-            var encryptedBytes = aesjs.utils.hex.toBytes(keys[i].privateHex);
+            let encryptedBytes = aesjs.utils.hex.toBytes(keys[i].privateHex);
             let decryptedMessage = await aesCtr.decrypt(encryptedBytes);
             let decryptedText = aesjs.utils.utf8.fromBytes(decryptedMessage);
             let regeneratedPublicKey = PrivateKey.fromString(decryptedText).toPublic().toString() 

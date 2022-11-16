@@ -66,13 +66,22 @@ const signMessage = async (req: Request, res: Response): Promise<Response> => {
 }
 
 async function recoverPublicKey(req: Request, res: Response): Promise<Response> {
-  const {message, signature} = req.body;
-  const publicKey = await KeysService.recoverPublicKey(message, signature)
-  return res.status(200).json({
-    success: true,
-    data: { publicKey },
-    message: null
-  })
+  try {
+    const {message, signature} = req.body;
+    const publicKey = await KeysService.recoverPublicKey(message, signature)
+    return res.status(200).json({
+      success: true,
+      data: { publicKey },
+      message: null
+    })
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      data: null,
+      message: error.message
+    });
+  }
+  
 }
 
 export default {
