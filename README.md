@@ -6,7 +6,7 @@
 - Message Signing
 - Public Key Receovery
 
-## Frontend
+## Frontend folder
 
 ## Project setup
 ```
@@ -25,7 +25,7 @@ npm run lint
 ```
 
 
-## Backend
+## Backend folder (open a separate terminal)
 
 ### Project setup
 ```
